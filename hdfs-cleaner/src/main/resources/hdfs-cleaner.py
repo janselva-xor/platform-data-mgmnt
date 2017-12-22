@@ -323,7 +323,9 @@ def main():
     jobs = list()
     with file('properties.json') as property_file:
         properties = json.load(property_file)
+    print properties['hadoop_distro']
     platform = Platform.factory(properties['hadoop_distro'])
+    print platform
     # discover endpoints
     endpoints = platform.discover(properties)
     assert endpoints
@@ -370,6 +372,19 @@ def main():
     job_common_dirs = JOB('clean_general_dir', hdfs, cleanup_on_size, delete_cmd,
                           general_dirs_to_clean, NEG_SIZE)
     jobs.append(job_common_dirs)
+
+    # staging dataset to clean
+    staging_dataset_to_clean = properties['staging_dataset_to_clean']
+    if 'mode' in staging_dataset_to_clean.keys():
+	if staging_dataset_to_clean['mode'] == 'delete':
+	   cmd = delete_cmd
+	else:
+	   cmd = archive_cmd
+        age = staging_dataset_to_clean.get('age', 1)
+        staging_dataset_location = staging_dataset_to_clean['staging_dataset_location']
+        job_staging_dirs = JOB('clean_staging_dataset', hdfs, cleanup_on_age, cmd,
+                              staging_dataset_location, age)
+        jobs.append(job_staging_dirs)
 
     old_dirs_to_clean = properties['old_dirs_to_clean']
     for entry in old_dirs_to_clean:
