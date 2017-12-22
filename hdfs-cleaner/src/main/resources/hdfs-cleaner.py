@@ -323,9 +323,7 @@ def main():
     jobs = list()
     with file('properties.json') as property_file:
         properties = json.load(property_file)
-    print properties['hadoop_distro']
     platform = Platform.factory(properties['hadoop_distro'])
-    print platform
     # discover endpoints
     endpoints = platform.discover(properties)
     assert endpoints
@@ -388,7 +386,6 @@ def main():
 
     old_dirs_to_clean = properties['old_dirs_to_clean']
     for entry in old_dirs_to_clean:
-        print entry['name']
         age = int(time.time() - entry['age_seconds'])
         job_old_dirs = JOB('clean_old_dir', hdfs, cleanup_on_age, delete_cmd, entry['name'], age)
         jobs.append(job_old_dirs)
